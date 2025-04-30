@@ -1,45 +1,59 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import appstyles from '@/styles/appStyles';
+
 
 import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { TopNavbar } from '@/components/TopNavbar';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
+    <>
+    <TopNavbar />
+
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+    screenOptions={{
+      tabBarActiveTintColor: 'white',
+      tabBarInactiveTintColor: 'white',
+      headerShown: false,
+      tabBarButton: HapticTab,
+      tabBarStyle: appstyles.tabBarStyle,
+      tabBarLabelStyle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        textAlign: 'center',   // Horizontally center the text
+      },
+      tabBarIconStyle: {
+        height: 0
+      },
+
+      tabBarBackground: () => (
+        <SafeAreaView style={{ backgroundColor: 'black', flex: 1 }} />
+      ),
+    }}
+  >
+  
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Pushups',
+            tabBarIcon: () => null,
+            tabBarActiveBackgroundColor: 'purple', // <-- Hintergrund lila, wenn aktiv!
+          }}
+        />
+        <Tabs.Screen
+          name="pullups"
+          options={{
+            title: 'Pullups',
+            tabBarIcon: () => null,
+            tabBarActiveBackgroundColor: 'purple', // <-- Hintergrund lila, wenn aktiv!
+          }}
+        />
+      </Tabs>
+      </>
   );
 }

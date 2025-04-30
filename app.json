@@ -32,10 +32,20 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c57220cf-1785-4cf5-ba1a-1eb645568ae2"
+      }
+    },
+    "owner": "akzeitlos"
   }
 }

@@ -1,39 +1,66 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+import { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';  // SecureStore for checking login status
+import { useRouter } from 'expo-router'; // Ensure we use useRouter for navigation
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // Track login status
+  const router = useRouter(); // Router instance for navigation
+  
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    const checkLoginStatus = async () => {
+      try {
+        const token = await SecureStore.getItemAsync('token');
+    
+        if (!token) {
+          setIsLoggedIn(false);
+          return;
+        }
+    
+        // Validate token with backend
+        const response = await axios.get('https://www.pushandpull.app/api/user', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+    
+        // If request succeeds, token is valid
+        setIsLoggedIn(true);
+      } catch (error) {
+        // If error, token is likely invalid
+        console.warn('Token invalid or expired:', error);
+        await SecureStore.deleteItemAsync('token'); // Clear the invalid token
+        setIsLoggedIn(false);
+      }
+    };
+    
+    checkLoginStatus(); // Check login status when component mounts
+  }, []);
 
-  if (!loaded) {
-    return null;
+  if (isLoggedIn === null) {
+    // Show a loading indicator while checking login status
+    return (
+      <View>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    );
   }
 
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+  if (!isLoggedIn) {
+    // If not logged in, show the login screen
+    return (
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    );
+  }
+
+  // If logged in, show the main app screen
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+    </Stack>
   );
 }
